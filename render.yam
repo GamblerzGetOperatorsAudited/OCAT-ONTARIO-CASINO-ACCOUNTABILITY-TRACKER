@@ -1,0 +1,27 @@
+# Exported from Render on 2026-04-10T10:17:21Z
+version: "1"
+projects:
+- name: My project
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: OCAT-ONTARIO-CASINO-ACCOUNTABILITY-TRACKER
+      runtime: node
+      repo: https://github.com/GamblerzGetOperatorsAudited/OCAT-ONTARIO-CASINO-ACCOUNTABILITY-TRACKER
+      plan: free
+      envVars:
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      region: oregon
+      buildCommand: yarn install && yarn add mysql2 && node apply-migrations.mjs &&
+        yarn build
+      startCommand: yarn start
+      autoDeployTrigger: commit
+git add render.yaml
+git commit -m "Add render.yaml"
+git push
