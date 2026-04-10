@@ -1,0 +1,12 @@
+# Exported from Render on 2026-04-10T12:07:14Z
+version: "1"
+databases:
+- name: ocat-db
+  databaseName: ocat_db
+  user: ocat_db_user
+  plan: free
+  region: oregon
+  ipAllowList:
+  - source: 0.0.0.0/0
+    description: everywhere
+  postgresMajorVersion: "18"
