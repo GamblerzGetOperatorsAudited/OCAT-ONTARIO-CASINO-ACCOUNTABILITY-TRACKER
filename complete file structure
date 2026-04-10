@@ -1,0 +1,26 @@
+gamblers-got-ya/
+├── package.json                  ← Root (for backend)
+├── server.js                     ← Secure backend
+├── core.js
+├── lobby.js
+├── vite.config.ts                ← Frontend build config
+├── tsconfig.json
+├── index.html                    ← Vite entry
+├── public/
+│   └── favicon.ico
+└── src/
+    ├── main.tsx
+    ├── App.tsx                   ← Main app with all tabs
+    ├── components/
+    │   ├── Header.tsx
+    │   ├── DriveBrowser.tsx
+    │   ├── SignInModal.tsx
+    │   └── SettingsPanel.tsx
+    ├── pages/
+    │   ├── Dashboard.tsx
+    │   ├── Visual.tsx
+    │   ├── Analytics.tsx
+    │   ├── Data.tsx
+    │   └── Reports.tsx
+    └── styles/
+        └── globals.css
