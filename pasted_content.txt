@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OCAT - Ontario Casino Accountability & Transparency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+        .legal-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .safety-bg { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        input:focus, select:focus, textarea:focus { border-color: #f59e0b !important; ring: 2px solid #f59e0b; outline: none; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-900 overflow-x-hidden">
+
+<div x-data="ocatApp()" x-init="init()" class="max-w-md mx-auto min-h-screen relative shadow-2xl bg-white flex flex-col">
+
+    <!-- 1. GATEWAY SCREEN -->
+    <template x-if="view === 'gateway'">
+        <div class="flex flex-col h-screen animate-fadeIn">
+            <div class="safety-bg flex-1 flex flex-col items-center justify-center p-8 text-white text-center">
+                <i class="fas fa-shield-heart text-6xl mb-4 text-emerald-400"></i>
+                <h1 class="text-3xl font-black tracking-tight">PLAYER SAFETY</h1>
+                <p class="text-sm opacity-80 mt-2 max-w-xs text-emerald-50">Immediate tools for responsible gambling and self-exclusion resources.</p>
+                <button @click="alert('Redirecting to iGaming Ontario Safety Portal...')" class="mt-8 bg-emerald-50 text-emerald-900 font-bold py-4 px-10 rounded-full shadow-xl w-full active:scale-95 transition">GET HELP NOW</button>
+            </div>
+            <div class="legal-bg flex-1 flex flex-col items-center justify-center p-8 text-white text-center">
+                <i class="fas fa-gavel text-6xl mb-4 text-amber-500"></i>
+                <h1 class="text-3xl font-black tracking-tight uppercase">OCAT PLATFORM</h1>
+                <p class="text-sm opacity-80 mt-2 max-w-xs text-slate-300 text-amber-50">Public database for regulatory accountability and fair player assurance.</p>
+                <button @click="view = 'login'" class="mt-8 bg-amber-500 text-slate-900 font-bold py-4 px-10 rounded-full shadow-xl w-full active:scale-95 transition uppercase tracking-widest">Enter Registry</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 2. LOGIN / SIGNUP SCREEN -->
+    <template x-if="view === 'login' || view === 'signup'">
+        <div class="p-8 pt-16 flex-1 bg-slate-50 relative animate-slideUp">
+            <button @click="view = 'gateway'" class="absolute top-6 left-6 text-slate-400"><i class="fas fa-chevron-left"></i></button>
+            
+            <div x-show="view === 'login'">
+                <h2 class="text-3xl font-black mb-2 italic">SIGN IN</h2>
+                <p class="text-slate-500 mb-10">Access the accountability matrix.</p>
+                <input type="email" placeholder="Email Address" class="w-full bg-white border rounded-xl p-4 mb-4 shadow-sm">
+                <input type="password" placeholder="Password" class="w-full bg-white border rounded-xl p-4 mb-8 shadow-sm">
+                <button @click="view = 'dashboard'; signedIn = true" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold shadow-lg">LOGIN</button>
+                <p class="text-center mt-6 text-sm">No account? <button @click="view = 'signup'" class="text-amber-600 font-bold">Sign up here.</button></p>
+            </div>
+
+            <div x-show="view === 'signup'" class="space-y-4">
+                <h2 class="text-2xl font-black mb-2">CREATE IDENTITY</h2>
+                <p class="text-xs text-red-600 font-bold mb-4 uppercase italic">Contractual Consent Required Below:</p>
+                
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <template x-for="(pillar, index) in pillars" :key="index">
+                        <div class="bg-white p-4 rounded-lg border shadow-sm transition" :class="agreements[index] ? 'border-emerald-500 bg-emerald-50' : ''">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-xs font-black uppercase text-slate-500" x-text="'Agreement ' + (index + 1)"></h3>
+                                <input type="checkbox" x-model="agreements[index]" class="h-5 w-5 rounded text-amber-500">
+                            </div>
+                            <p class="font-bold text-sm mt-1" x-text="pillar.title"></p>
+                            <p class="text-[10px] text-slate-500 leading-tight mt-1" x-text="pillar.text"></p>
+                        </div>
+                    </template>
+                </div>
+
+                <button 
+                    x-show="agreements.every(a => a === true)" 
+                    @click="view = 'dashboard'; signedIn = true" 
+                    class="w-full bg-amber-500 py-4 rounded-xl font-black text-slate-900 shadow-xl animate-bounce mt-4">
+                    ENTER SECURE DATABASE
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 3. DASHBOARD / CAMPAIGN BOARD -->
+    <template x-if="view === 'dashboard'">
+        <div class="flex flex-col h-screen animate-fadeIn">
+            <header class="bg-slate-900 text-white p-5 flex justify-between items-end border-b-4 border-amber-500">
+                <div>
+                    <h1 class="text-xl font-black italic tracking-tighter">OCAT <span class="text-amber-500">LIVE</span></h1>
+                    <p class="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Registry for Public Scrutiny</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[9px] font-bold text-amber-500">ACTIVE ALERTS</p>
+                    <p class="text-lg font-black leading-none" x-text="reports.length"></p>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-4 pb-32">
+                <!-- Stat Comparison Tool -->
+                <div class="bg-slate-900 p-4 rounded-2xl text-white shadow-lg overflow-hidden relative">
+                    <div class="relative z-10">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3">Compliance Comparison</h3>
+                        <div class="space-y-2">
+                            <template x-for="stat in getStats()">
+                                <div>
+                                    <div class="flex justify-between text-[10px] mb-1">
+                                        <span x-text="stat.name"></span>
+                                        <span x-text="stat.count + ' Reports'"></span>
+                                    </div>
+                                    <div class="w-full bg-slate-800 h-1 rounded-full">
+                                        <div class="bg-amber-500 h-1 rounded-full transition-all duration-1000" :style="'width:' + stat.percent + '%'"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <i class="fas fa-chart-line absolute -bottom-2 -right-2 text-6xl text-slate-800 opacity-50"></i>
+                </div>
+
+                <!-- Alert Board -->
+                <h2 class="text-xs font-black text-slate-400 tracking-[.25em] pt-4 px-1">CURRENT CAMPAIGN ALERTS</h2>
+                
+                <template x-for="report in reports" :key="report.id">
+                    <div class="bg-white border-2 border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                        <div class="p-3 border-b bg-slate-50 flex justify-between items-center">
+                            <span class="text-[10px] font-black font-mono text-slate-400" x-text="report.id"></span>
+                            <span class="bg-amber-100 text-amber-800 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase italic" x-text="report.category"></span>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                <h4 class="font-black text-lg text-slate-800 uppercase" x-text="report.casino"></h4>
+                            </div>
+                            <p class="text-sm text-slate-600 line-clamp-3 leading-relaxed" x-text="report.desc"></p>
+                            <div class="mt-4 flex justify-between items-center text-[10px] border-t pt-3">
+                                <span class="text-slate-400 font-bold" x-text="'FILED: ' + report.date"></span>
+                                <button @click="alert('Loading evidence vault for ' + report.id)" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg font-bold">VIEW CASE</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </main>
+
+            <!-- Bottom Navigation -->
+            <nav class="fixed bottom-0 max-w-md w-full glass border-t flex justify-around p-4 pb-8 shadow-2xl">
+                <button @click="view = 'dashboard'" class="text-amber-600"><i class="fas fa-bullhorn text-2xl"></i><span class="block text-[8px] font-bold mt-1">BOARD</span></button>
+                <button @click="openMatrix()" class="text-slate-400"><i class="fas fa-layer-group text-2xl"></i><span class="block text-[8px] font-bold mt-1">MATRIX</span></button>
+                <button @click="openReporter()" class="bg-slate-900 text-white w-14 h-14 rounded-full -mt-10 border-4 border-white shadow-xl flex items-center justify-center"><i class="fas fa-plus text-xl"></i></button>
+                <button @click="alert('Statistical Export Module Loading...')" class="text-slate-400"><i class="fas fa-chart-pie text-2xl"></i><span class="block text-[8px] font-bold mt-1">STATS</span></button>
+                <button @click="view = 'gateway'" class="text-slate-400"><i class="fas fa-user-shield text-2xl"></i><span class="block text-[8px] font-bold mt-1">SAFETY</span></button>
+            </nav>
+        </div>
+    </template>
+
+    <!-- 4. MODAL: THE 25-QUESTION REPORTER -->
+    <div x-show="showReporter" x-cloak class="fixed inset-0 z-50 glass flex flex-col p-6 animate-slideUp">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-black italic">FILE <span class="text-amber-500">ALLEGATION</span></h2>
+            <button @click="showReporter = false" class="bg-slate-100 p-2 rounded-full"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Question Steps Progress -->
+        <div class="flex gap-1 mb-8">
+            <template x-for="i in 5">
+                <div class="h-1.5 flex-1 rounded-full transition-colors" :class="reportStep >= i ? 'bg-amber-500' : 'bg-slate-200'"></div>
+            </template>
+        </div>
+
+        <div class="flex-1 overflow-y-auto">
+            <!-- Step 1: Basics -->
+            <div x-show="reportStep === 1" class="space-y-4">
+                <p class="text-xs font-bold uppercase text-slate-400 tracking-widest border-b pb-2">Step 1: Incident Foundation</p>
+                <div>
+                    <label class="text-xs font-black uppercase italic">Casino Entity</label>
+                    <select x-model="newReport.casino" class="w-full border-2 rounded-xl p-4 mt-1">
+                        <option value="">Select Operator...</option>
+                        <template x-for="c in casinoList" :key="c">
+                            <option :value="c" x-text="c"></option>
+                        </template>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-black uppercase italic tracking-widest">Breach Description (2000 chars max)</label>
+                    <textarea x-model="newReport.desc" maxlength="2000" class="w-full border-2 rounded-xl p-4 mt-1 h-32" placeholder="Describe the asset loss or malfunction..."></textarea>
+                </div>
+                <div>
+                    <label class="text-xs font-black uppercase italic">Date of Occurrence</label>
+                    <input type="date" x-model="newReport.date" class="w-full border-2 rounded-xl p-4 mt-1">
+                </div>
+            </div>
+
+            <!-- Steps 2-5: The 25 Systematic Questions -->
+            <template x-for="(group, gIdx) in questionGroups">
+                <div x-show="reportStep === (gIdx + 2)" class="space-y-6">
+                    <p class="text-xs font-bold uppercase text-slate-400 tracking-widest border-b pb-2" x-text="group.title"></p>
+                    <template x-for="(q, qIdx) in group.questions">
+                        <div class="bg-white p-4 rounded-xl border-2">
+                            <p class="text-sm font-bold mb-3" x-text="q.text"></p>
+                            <div class="flex gap-2">
+                                <button @click="newReport.answers[q.id] = 'Yes'" :class="newReport.answers[q.id] === 'Yes' ? 'bg-amber-500 text-white border-amber-500' : 'bg-slate-50 border-slate-200'" class="flex-1 py-2 border rounded-lg text-xs font-black transition">YES</button>
+                                <button @click="newReport.answers[q.id] = 'No'" :class="newReport.answers[q.id] === 'No' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 border-slate-200'" class="flex-1 py-2 border rounded-lg text-xs font-black transition">NO</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Nav Buttons -->
+        <div class="mt-8 flex gap-4">
+            <button x-show="reportStep > 1" @click="reportStep--" class="flex-1 py-4 bg-slate-100 rounded-xl font-black">BACK</button>
+            <button @click="nextStep()" class="flex-1 py-4 bg-slate-900 text-white rounded-xl font-black uppercase tracking-widest">
+                <span x-text="reportStep < 5 ? 'Continue' : 'Finalize & Post'"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 5. SYSTEMATIC MATRIX (Regulatory Knowledge Base) -->
+    <div x-show="showMatrix" x-cloak class="fixed inset-0 z-50 bg-slate-900 text-white p-6 overflow-y-auto animate-slideIn">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-black uppercase italic">Regulation <span class="text-amber-500 font-black">Matrix</span></h2>
+            <button @click="showMatrix = false" class="bg-slate-800 p-2 rounded-full"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="space-y-6">
+            <template x-for="std in standards">
+                <div class="border-l-4 border-amber-500 p-4 bg-slate-800 rounded-r-xl">
+                    <h3 class="font-black text-amber-500 uppercase tracking-tighter" x-text="std.id"></h3>
+                    <p class="font-bold text-sm" x-text="std.title"></p>
+                    <p class="text-[10px] text-slate-400 mt-2 leading-relaxed" x-text="std.desc"></p>
+                </div>
+            </template>
+        </div>
+        
+        <div class="mt-10 bg-amber-500 p-6 rounded-2xl text-slate-900">
+            <h4 class="font-black italic mb-2">PROVINCIAL DUE PROCESS</h4>
+            <p class="text-[10px] leading-tight font-bold">1. File Internal Complaint with Operator<br>2. Obtain Case Number<br>3. Wait 90-Days for Final Response<br>4. File via iAGCO Portal</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function ocatApp() {
+    return {
+        view: 'gateway',
+        signedIn: false,
+        showReporter: false,
+        showMatrix: false,
+        reportStep: 1,
+        agreements: [false, false, false, false],
+        pillars: [
+            { title: "No Malice & Anti-Defamation", text: "I agree to provide information without embellishment or willful misleading statements. OCAT is not associated with members who abuse the platform for defamation." },
+            { title: "Honest & Truthful", text: "I certify that every statement is the absolute truth of my personal experiences. False reporting leads to immediate ban." },
+            { title: "Proof of Breach", text: "I agree to provide evidence of implications regarding AGCO Registrar breaches when requested." },
+            { title: "Respectful Community", text: "No harassing, bullying, or targeted arguing with other platform members." }
+        ],
+        casinoList: ["BetMGM Ontario", "FanDuel Ontario", "DraftKings", "Northstar Gaming", "Bet365", "888 Casino", "PointsBet", "LeoVegas"],
+        standards: [
+            { id: "Standard 4.10", title: "Game Malfunctions", desc: "Operators must have clear policies for handling technical glitches and ensuring fair outcomes." },
+            { id: "Standard 5.01", title: "Asset Protection", desc: "Ensures that player funds and promised prizes (like extra spins) are accurately handled and protected." },
+            { id: "Standard 2.01", title: "Responsible Gambling", desc: "Mandates that players are provided with tools to limit play and access support." }
+        ],
+        reports: [],
+        newReport: { casino: '', desc: '', date: '', category: 'Integrity', answers: {} },
+        questionGroups: [
+            { title: "Step 2: Technical/Legal Audit", questions: [
+                { id: 'q1', text: "Did the malfunction occur at a point of potential payout?" },
+                { id: 'q2', text: "Was a Round ID or Game ID visible/provided?" },
+                { id: 'q3', text: "Did you formally request Server-Side Game Logs?" },
+                { id: 'q4', text: "Was that request for logs denied by the casino?" },
+                { id: 'q5', text: "Did the T&Cs provided match the game's actual behavior?" }
+            ]},
+            { title: "Step 3: Process & Paper Trail", questions: [
+                { id: 'q6', text: "Did a human (not a bot) respond within 24 hours?" },
+                { id: 'q7', text: "Were you provided an Internal Dispute ID number?" },
+                { id: 'q8', text: "Did the agent provide their 'Escalation Manager' info?" },
+                { id: 'q9', text: "Was the interaction transcript shared with you?" },
+                { id: 'q10', text: "Did they inform you of your right to contact iGO/AGCO?" }
+            ]},
+            { title: "Step 4: Retaliation & Ethics", questions: [
+                { id: 'q11', text: "Was your account locked after you questioned them?" },
+                { id: 'q12', text: "Are withdrawal delays happening alongside this dispute?" },
+                { id: 'q13', text: "Did they offer a 'Goodwill Bonus' to drop the claim?" },
+                { id: 'q14', text: "Did they ask you to sign a non-disclosure/waiver?" },
+                { id: 'q15', text: "Did they blame your local internet/hardware?" }
+            ]},
+            { title: "Step 5: Impact & Health", questions: [
+                { id: 'q16', text: "Is this incident causing financial or emotional distress?" },
+                { id: 'q17', text: "Did you mention distress to the operator?" },
+                { id: 'q18', text: "Did they offer RG tools after you showed distress?" },
+                { id: 'q19', text: "Is this a recurring issue with this license holder?" },
+                { id: 'q20', text: "Do you believe this is a systemic technical flaw?" }
+            ]}
+        ],
+        init() {
+            const saved = localStorage.getItem('ocat_reports');
+            if (saved) {
+                this.reports = JSON.parse(saved);
+            } else {
+                this.reports = [
+                    { id: 'OCAT-001', casino: 'BetMGM Ontario', desc: 'Extra spins not finishing. Promised 10, only 6 delivered. Support denied server logs.', date: '2023-10-22', category: 'Standard 5.01' },
+                    { id: 'OCAT-002', casino: 'Northstar Gaming', desc: 'Account lock immediately following 5k withdrawal request. Alleged verification loop.', date: '2023-10-24', category: 'Standard 4.1' }
+                ];
+            }
+        },
+        getStats() {
+            let counts = {};
+            this.reports.forEach(r => {
+                counts[r.casino] = (counts[r.casino] || 0) + 1;
+            });
+            return Object.keys(counts).map(name => ({
+                name,
+                count: counts[name],
+                percent: (counts[name] / this.reports.length) * 100
+            })).sort((a,b) => b.count - a.count);
+        },
+        openReporter() {
+            this.newReport = { casino: '', desc: '', date: '', category: 'Standard 5.01', answers: {} };
+            this.reportStep = 1;
+            this.showReporter = true;
+        },
+        openMatrix() {
+            this.showMatrix = true;
+        },
+        nextStep() {
+            if (this.reportStep < 5) {
+                this.reportStep++;
+            } else {
+                this.submitReport();
+            }
+        },
+        submitReport() {
+            const id = 'OCAT-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            this.reports.unshift({...this.newReport, id: id});
+            localStorage.setItem('ocat_reports', JSON.stringify(this.reports));
+            this.showReporter = false;
+            alert("ALLEGATION BROADCASTED: Your report is now part of the statistical database for public scrutiny.");
+        }
+    }
+}
+</script>
+
+<style>
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.animate-fadeIn { animation: fadeIn 0.4s ease-out; }
+.animate-slideUp { animation: slideUp 0.4s ease-out; }
+.animate-slideIn { animation: slideIn 0.3s ease-out; }
+</style>
+
+</body>
+</html>
